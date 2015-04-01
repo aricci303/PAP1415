@@ -108,7 +108,10 @@ instance Drawable Shape where
 		draw (Line p0 p1)
 		draw (Line p1 p2)
 		draw (Line p0 p2)
-	draw (Circle (xc,yc) r) = drawCr (xc,yc) (fromIntegral r)xw 0
+	draw (Circle (xc,yc) r) = drawCr (xc,yc) (fromIntegral r) 0
+	draw (Combo xs) = foldr (>>) (return ()) (map draw xs)
+
+-- naive line algorithm - could be improved (see Bresenham)
 
 drawLnDX :: Int -> Float -> Int -> Float -> IO ()
 drawLnDX x y xtarget delta 
@@ -124,14 +127,16 @@ drawLnDY x y ytarget delta
 		writeAt (round x, y) "*"
 		drawLnDY (x+delta) (y+1) ytarget delta
 
+-- naive algorithm - could be improved (see Bresenham)
+
 drawCr :: P2d -> Float -> Float -> IO()
 drawCr (xc,yc) r rad 
 	| rad >= 2*pi = return ()
 	| otherwise = do
 		writeAt (px,py) "*"
-		drawCr (xc,yc) r (rad+0.1)
+		drawCr (xc,yc) r (rad+r*0.0125)
 			where 	px = round( fromIntegral xc + (cos rad)*r);
-					py = round( fromIntegral xc - (sin rad)*r)
+					py = round( fromIntegral yc - (sin rad)*r)
 
 --
 
@@ -141,6 +146,12 @@ drawAll xs = foldr (>>) (return ()) (map draw xs)
 --
 
 testShapes :: [Shape]
-testShapes = [ Rect (3,5) (10,10), Line (1,1) (8,8), Circle (4,4) 2, Tri (1,3) (3,1) (3,3)]
+testShapes = [ Rect (1,1) (20,20), Line (1,1) (20,10), Tri (20,10) (30,1) (40,10), Circle (30,12) 6]
+
+
+testShapes2 :: [Shape]
+testShapes2 = [ Rect (1,1) (20,20), Combo [Line (1,1) (20,10), Tri (20,10) (30,1) (40,10)], Circle (30,12) 5]
+
+
 
 
